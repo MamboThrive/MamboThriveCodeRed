@@ -1,0 +1,11 @@
+Dockerfile
+.cr.ini
+.vscode/
+.venv/
+db.sqlite3
+htmlcov/
+.git/
+.DS_Store
+.secret
+.env
+*.log
