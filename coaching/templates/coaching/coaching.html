@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Coaching Overview{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
+    <h1 class="text-2xl font-bold mb-4">Coaching Overview</h1>
+    <h2 class="text-xl font-semibold mt-6 mb-2">Your Health Goals</h2>
+    <ul>
+        {% for goal in goals %}
+        <li class="mb-2 border-b pb-2 flex items-center justify-between">
+            <span><span class="font-semibold">{{ goal.name }}</span> ({{ goal.start_date }} - {{ goal.target_date }})</span>
+            {% if goal.completed %}<span class="ml-2 text-green-600">[Completed]</span>{% endif %}
+        </li>
+        {% empty %}
+        <li>No goals found.</li>
+        {% endfor %}
+    </ul>
+    <h2 class="text-xl font-semibold mt-6 mb-2">Coach Messages</h2>
+    <ul>
+        {% for message in messages %}
+        <li class="mb-2 border-b pb-2">
+            <span class="font-semibold">{{ message.created_at }}</span> - {{ message.source|title }}<br>
+            {{ message.message }}
+        </li>
+        {% empty %}
+        <li>No messages found.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -13,6 +13,13 @@ urlpatterns = [
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
+    # App-specific URL includes
+    path("coaching/", include("coaching.urls")),  # Coaching app URLs
+    path("core/", include("core.urls")),          # Core app URLs
+    path("dashboard/", include("dashboard.urls")),# Dashboard app URLs
+    path("nutrition/", include("nutrition.urls")),# Nutrition app URLs
+    path("users/", include("users.urls")),        # Users app URLs
+    path("accounts/", include("allauth.urls")),   # Allauth URLs at root
 ]
 
 

@@ -24,29 +24,55 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # Application definition
 
 INSTALLED_APPS = [
-    "home",
-    "search",
-    "wagtail.contrib.forms",
-    "wagtail.contrib.redirects",
-    "wagtail.embeds",
-    "wagtail.sites",
-    "wagtail.users",
-    "wagtail.snippets",
-    "wagtail.documents",
-    "wagtail.images",
-    "wagtail.search",
-    "wagtail.admin",
-    "wagtail",
-    "modelcluster",
-    "taggit",
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    'tailwind',
-    'theme',
+    # -------------------
+    # Project Applications
+    # -------------------
+    "home",           # Home page and landing views
+    'core.apps.CoreConfig',
+    'health_data.apps.HealthDataConfig',
+    'nutrition.apps.NutritionConfig',
+    'coaching.apps.CoachingConfig',
+     'users.apps.UsersConfig',
+    'dashboard.apps.DashboardConfig',
+    
+    # -------------------
+    # Third-Party Applications
+    # -------------------
+    "search",                     # Custom or third-party search app
+    "wagtail.contrib.forms",      # Wagtail form builder
+    "wagtail.contrib.redirects",  # Wagtail redirects management
+    "wagtail.embeds",             # Wagtail embed support
+    "wagtail.sites",              # Wagtail multi-site support
+    "wagtail.users",              # Wagtail user management
+    "wagtail.snippets",           # Wagtail reusable content
+    "wagtail.documents",          # Wagtail document management
+    "wagtail.images",             # Wagtail image management
+    "wagtail.search",             # Wagtail search backend
+    "wagtail.admin",              # Wagtail admin interface
+    "wagtail",                    # Wagtail core
+    "modelcluster",               # Wagtail model cluster utility
+    "taggit",                     # Tagging for content
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'widget_tweaks',
+
+    # -------------------
+    # Django Core Applications
+    # -------------------
+    "django.contrib.admin",       # Django admin site
+    "django.contrib.auth",        # Django authentication framework
+    "django.contrib.contenttypes",# Django content type system
+    "django.contrib.sessions",    # Django session framework
+    "django.contrib.messages",    # Django messaging framework
+    "django.contrib.staticfiles", # Django static file management
+
+    # -------------------
+    # Frontend & Styling
+    # -------------------
+    'tailwind',        # Tailwind CSS integration
+    'theme',           # Custom theme app (Tailwind CSS)
 ]
 
 TAILWIND_APP_NAME = 'theme'
@@ -56,6 +82,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # Required by allauth
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -186,3 +213,33 @@ WAGTAILADMIN_BASE_URL = "http://example.com"
 # if untrusted users are allowed to upload files -
 # see https://docs.wagtail.org/en/stable/advanced_topics/deploying.html#user-uploaded-files
 WAGTAILDOCS_EXTENSIONS = ['csv', 'docx', 'key', 'odt', 'pdf', 'pptx', 'rtf', 'txt', 'xlsx', 'zip']
+
+# LOGIN_URL = '/users/login/'  # Removed to avoid conflict with allauth
+LOGIN_URL = '/accounts/login/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# For production, use SMTP backend and configure EMAIL_HOST, EMAIL_PORT, etc.
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.example.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'your-email@example.com'
+# EMAIL_HOST_PASSWORD = 'your-password'
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = 'MamboThrive <noreply@mambothrive.com>'
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_LOGOUT_ON_GET = True
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'

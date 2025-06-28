@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Health Test Results{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
+    <h1 class="text-2xl font-bold mb-4">Health Test Results</h1>
+    <table class="min-w-full table-auto">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="px-4 py-2">Test Name</th>
+                <th class="px-4 py-2">Date</th>
+                <th class="px-4 py-2">Result</th>
+                <th class="px-4 py-2">Unit</th>
+                <th class="px-4 py-2">Flagged</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr class="border-b hover:bg-blue-50">
+                <td class="px-4 py-2">{{ result.test_name }}</td>
+                <td class="px-4 py-2">{{ result.test_date }}</td>
+                <td class="px-4 py-2">{{ result.result_value }}</td>
+                <td class="px-4 py-2">{{ result.unit }}</td>
+                <td class="px-4 py-2">{% if result.flagged %}<span class="text-red-600 font-bold">Yes</span>{% else %}No{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center py-4">No results found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+Hi {{ user.username }},
+
+Thank you for registering at MamboThrive!
+
+Please click the link below to activate your account:
+{{ protocol }}://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}
+
+If you did not register, please ignore this email.
+
+Thanks,
+The MamboThrive Team

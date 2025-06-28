@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Health Goals{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Health Goals</h1>
+    <ul>
+        {% for goal in goals %}
+        <li class="mb-2 border-b pb-2">
+            <span class="font-semibold">{{ goal.name }}</span> ({{ goal.start_date }} - {{ goal.target_date }})
+            {% if goal.completed %}<span class="ml-2 text-green-600">[Completed]</span>{% endif %}
+        </li>
+        {% empty %}
+        <li>No goals found.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

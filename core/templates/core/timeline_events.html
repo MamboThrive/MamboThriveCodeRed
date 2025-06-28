@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Timeline Events{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
+    <h1 class="text-2xl font-bold mb-4">Timeline Events</h1>
+    <ul>
+        {% for event in events %}
+        <li class="mb-2 border-b pb-2">
+            <span class="font-semibold">{{ event.timestamp }}</span> - {{ event.event_type }}<br>
+            {{ event.summary }}
+        </li>
+        {% empty %}
+        <li>No events found.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

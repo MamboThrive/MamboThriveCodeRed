@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Food Logs{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
+    <h1 class="text-2xl font-bold mb-4">Food Logs</h1>
+    <table class="min-w-full table-auto">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="px-4 py-2">Meal Type</th>
+                <th class="px-4 py-2">Date</th>
+                <th class="px-4 py-2">Description</th>
+                <th class="px-4 py-2">Calories</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr class="border-b hover:bg-blue-50">
+                <td class="px-4 py-2">{{ log.meal_type }}</td>
+                <td class="px-4 py-2">{{ log.timestamp|date:'Y-m-d H:i' }}</td>
+                <td class="px-4 py-2">{{ log.description }}</td>
+                <td class="px-4 py-2">{{ log.calories }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4">No food logs found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Lab Report Uploads{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded shadow mt-8">
+    <h1 class="text-2xl font-bold mb-4">Lab Report Uploads</h1>
+    <ul>
+        {% for upload in uploads %}
+        <li class="mb-2 border-b pb-2 flex items-center justify-between">
+            <span><span class="font-semibold">{{ upload.uploaded_at }}</span> - {{ upload.source }}</span>
+            {% if upload.parsed %}<span class="ml-2 text-green-600">[Parsed]</span>{% endif %}
+        </li>
+        {% empty %}
+        <li>No uploads found.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

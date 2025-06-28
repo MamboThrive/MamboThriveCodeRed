@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}User KPIs{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
+    <h1 class="text-2xl font-bold mb-4">User KPIs</h1>
+    <table class="min-w-full table-auto">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="px-4 py-2">KPI Name</th>
+                <th class="px-4 py-2">Date</th>
+                <th class="px-4 py-2">Value</th>
+                <th class="px-4 py-2">Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for kpi in kpis %}
+            <tr class="border-b hover:bg-blue-50">
+                <td class="px-4 py-2">{{ kpi.kpi_name }}</td>
+                <td class="px-4 py-2">{{ kpi.date }}</td>
+                <td class="px-4 py-2">{{ kpi.value }}</td>
+                <td class="px-4 py-2">{{ kpi.unit }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4">No KPIs found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
