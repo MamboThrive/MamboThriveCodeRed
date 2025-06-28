@@ -10,13 +10,18 @@
     <nav class="bg-white shadow mb-8 sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <a href="/" class="text-2xl font-extrabold text-blue-600 tracking-tight">MamboThrive</a>
-            <div class="space-x-2">
-                <a href="/users/profile/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded transition">Profile</a>
+            <div class="space-x-2 flex items-center">
                 <a href="/dashboard/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded transition">Dashboard</a>
                 <a href="/health_data/results/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded transition">Health Data</a>
                 <a href="/nutrition/logs/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded transition">Nutrition</a>
                 <a href="/coaching/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded transition">Coaching</a>
-                <a href="/accounts/logout/" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded transition">Logout</a>
+                {% if user.is_authenticated %}
+                    <a href="/users/profile/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded transition">Profile</a>
+                    <span class="text-gray-500 font-semibold px-2">{{ user.get_full_name|default:user.username }}</span>
+                    <a href="/accounts/logout/" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded transition">Logout</a>
+                {% else %}
+                    <a href="/accounts/login/" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded transition font-semibold shadow">Log In</a>
+                {% endif %}
             </div>
         </div>
     </nav>

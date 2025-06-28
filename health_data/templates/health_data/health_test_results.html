@@ -2,10 +2,11 @@
 {% block title %}Health Test Results{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
-    <h1 class="text-2xl font-bold mb-4">Health Test Results</h1>
-    <table class="min-w-full table-auto">
+    <h1 class="text-3xl font-extrabold mb-6 text-blue-700">Health Test Results</h1>
+    <div class="overflow-x-auto">
+    <table class="min-w-full table-auto border rounded-lg overflow-hidden">
         <thead>
-            <tr class="bg-gray-100">
+            <tr class="bg-blue-100 text-blue-800">
                 <th class="px-4 py-2">Test Name</th>
                 <th class="px-4 py-2">Date</th>
                 <th class="px-4 py-2">Result</th>
@@ -15,7 +16,7 @@
         </thead>
         <tbody>
             {% for result in results %}
-            <tr class="border-b hover:bg-blue-50">
+            <tr class="border-b even:bg-blue-50 hover:bg-blue-100">
                 <td class="px-4 py-2">{{ result.test_name }}</td>
                 <td class="px-4 py-2">{{ result.test_date }}</td>
                 <td class="px-4 py-2">{{ result.result_value }}</td>
@@ -23,9 +24,10 @@
                 <td class="px-4 py-2">{% if result.flagged %}<span class="text-red-600 font-bold">Yes</span>{% else %}No{% endif %}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="text-center py-4">No results found.</td></tr>
+            <tr><td colspan="5" class="text-center py-4 text-gray-400">No results found.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
 </div>
 {% endblock %}

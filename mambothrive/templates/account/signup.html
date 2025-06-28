@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load widget_tweaks %}
 {% block title %}Sign Up{% endblock %}
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-center min-h-[70vh]">
   <div class="max-w-md w-full space-y-8">
     <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-blue-700">Create your account</h2>
       <p class="mt-2 text-center text-sm text-gray-600">
         Or
         <a href="{% url 'account_login' %}" class="font-medium text-blue-600 hover:text-blue-500">sign in to your account</a>
@@ -18,13 +19,13 @@
         {% for field in form.visible_fields %}
         <div class="mb-4">
           <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
-          {{ field|add_class:'input input-bordered w-full' }}
+          {% render_field field class="input input-bordered w-full" %}
           {% if field.help_text %}<p class="text-xs text-gray-500">{{ field.help_text }}</p>{% endif %}
           {% for error in field.errors %}<p class="text-xs text-red-600">{{ error }}</p>{% endfor %}
         </div>
         {% endfor %}
       </div>
-      <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Sign Up</button>
+      <button type="submit" class="w-full py-2 px-4 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Sign Up</button>
     </form>
   </div>
 </div>

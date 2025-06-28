@@ -20,7 +20,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Built-in email sending service provided by CodeRed Cloud.
 # Change this to a different backend or SMTP server to use your own.
-EMAIL_BACKEND = 'cr_sendmail.backends.SendmailBackend'
+# EMAIL_BACKEND = 'cr_sendmail.backends.SendmailBackend'
+
+# Gmail SMTP email backend for production
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'MamboThrive@gmail.com'
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']  # Set this env var securely
+DEFAULT_FROM_EMAIL = 'MamboThrive <MamboThrive@gmail.com>'
 
 DATABASES = {
     'default': {

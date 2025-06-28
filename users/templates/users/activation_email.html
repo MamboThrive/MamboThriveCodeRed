@@ -1,11 +1,22 @@
-Hi {{ user.username }},
-
-Thank you for registering at MamboThrive!
-
-Please click the link below to activate your account:
-{{ protocol }}://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}
-
-If you did not register, please ignore this email.
-
-Thanks,
-The MamboThrive Team
+{% autoescape off %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Activate your account</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8fafc; color: #222; }
+    .container { max-width: 480px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #e0e7ef; padding: 32px; }
+    .btn { display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 style="color:#2563eb;">Welcome to MamboThrive!</h2>
+    <p>Thank you for registering. Please click the button below to activate your account:</p>
+    <a href="{{ activation_url }}" class="btn">Activate Account</a>
+    <p style="margin-top:24px; color:#64748b; font-size:13px;">If you did not register, you can ignore this email.</p>
+  </div>
+</body>
+</html>
+{% endautoescape %}

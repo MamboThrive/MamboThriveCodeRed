@@ -2,15 +2,15 @@
 {% block title %}Timeline Events{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
-    <h1 class="text-2xl font-bold mb-4">Timeline Events</h1>
-    <ul>
+    <h1 class="text-3xl font-extrabold mb-6 text-blue-700">Timeline Events</h1>
+    <ul class="space-y-4">
         {% for event in events %}
-        <li class="mb-2 border-b pb-2">
-            <span class="font-semibold">{{ event.timestamp }}</span> - {{ event.event_type }}<br>
-            {{ event.summary }}
+        <li class="bg-blue-50 rounded p-4 shadow-sm border-l-4 border-blue-400">
+            <span class="font-semibold text-blue-700">{{ event.timestamp }}</span> - <span class="text-gray-600">{{ event.event_type }}</span><br>
+            <span class="text-gray-800">{{ event.summary }}</span>
         </li>
         {% empty %}
-        <li>No events found.</li>
+        <li class="text-gray-400">No events found.</li>
         {% endfor %}
     </ul>
 </div>

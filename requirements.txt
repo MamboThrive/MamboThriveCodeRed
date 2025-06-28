@@ -15,6 +15,7 @@ cr==1.10
 cryptography==45.0.4
 defusedxml==0.7.1
 Django==5.1.11
+django-allauth==65.9.0
 django-filter==25.1
 django-modelcluster==6.4
 django-permissionedforms==0.1
@@ -23,6 +24,7 @@ django-taggit==6.1.0
 django-tailwind==4.0.1
 django-tasks==0.6.1
 django-treebeard==4.7.1
+django-widget-tweaks==1.5.0
 djangorestframework==3.16.0
 draftjs_exporter==5.1.0
 et_xmlfile==2.0.0
