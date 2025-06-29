@@ -6,33 +6,33 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-<h1>Search</h1>
-
-<form action="{% url 'search' %}" method="get">
-    <input type="text" name="query"{% if search_query %} value="{{ search_query }}"{% endif %}>
-    <input type="submit" value="Search" class="button">
-</form>
-
-{% if search_results %}
-<ul>
+<div class="max-w-2xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow mt-8">
+  <h1 class="text-2xl font-bold text-blue-800 mb-6">Search</h1>
+  <form action="{% url 'search' %}" method="get" class="flex flex-col sm:flex-row gap-2 mb-6">
+    <input type="text" name="query"{% if search_query %} value="{{ search_query }}"{% endif %} class="border border-gray-300 rounded px-3 py-2 flex-1" placeholder="Search...">
+    <input type="submit" value="Search" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold border border-blue-800 shadow cursor-pointer">
+  </form>
+  {% if search_results %}
+  <ul class="space-y-4 mb-4">
     {% for result in search_results %}
-    <li>
-        <h4><a href="{% pageurl result %}">{{ result }}</a></h4>
-        {% if result.search_description %}
-        {{ result.search_description }}
-        {% endif %}
+    <li class="bg-blue-50 rounded p-4 shadow-sm border-l-4 border-blue-400">
+      <h4 class="font-semibold text-blue-900 mb-1"><a href="{% pageurl result %}" class="hover:underline">{{ result }}</a></h4>
+      {% if result.search_description %}
+      <div class="text-gray-600 text-sm">{{ result.search_description }}</div>
+      {% endif %}
     </li>
     {% endfor %}
-</ul>
-
-{% if search_results.has_previous %}
-<a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a>
-{% endif %}
-
-{% if search_results.has_next %}
-<a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a>
-{% endif %}
-{% elif search_query %}
-No results found
-{% endif %}
+  </ul>
+  <div class="flex justify-between">
+    {% if search_results.has_previous %}
+    <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}" class="text-blue-700 hover:underline">Previous</a>
+    {% else %}<span></span>{% endif %}
+    {% if search_results.has_next %}
+    <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}" class="text-blue-700 hover:underline">Next</a>
+    {% endif %}
+  </div>
+  {% elif search_query %}
+  <div class="text-gray-400 text-center py-8">No results found</div>
+  {% endif %}
+</div>
 {% endblock %}

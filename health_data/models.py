@@ -1,19 +1,26 @@
 from django.db import models
 from django.conf import settings
+from modelcluster.fields import ParentalManyToManyField
 
 class HealthTestResult(models.Model):
-    """
-    Stores a single health test result (e.g., LDL, HbA1c, Blood Pressure).
-    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     test_date = models.DateField()
-    test_name = models.CharField(max_length=255)  # e.g., "LDL Cholesterol"
+    test_name = models.CharField(max_length=255)
     result_value = models.FloatField()
     unit = models.CharField(max_length=50)
     reference_range_min = models.FloatField(null=True, blank=True)
     reference_range_max = models.FloatField(null=True, blank=True)
     flagged = models.BooleanField(default=False)
     note = models.TextField(blank=True)
+
+    tags = ParentalManyToManyField("core.ConditionTag", blank=True)
+
+    # Phase 2+ Fields
+    ai_interpretation = models.TextField(blank=True)
+    interpretation_confidence = models.FloatField(null=True, blank=True)
+    is_trending_up = models.BooleanField(null=True, blank=True)
+    is_trending_down = models.BooleanField(null=True, blank=True)
+    standardized_code = models.CharField(max_length=50, blank=True)
 
     class Meta:
         ordering = ['-test_date']

@@ -10,3 +10,4 @@ class CustomUserAdmin(UserAdmin):
         ('Role', {'fields': ('role',)}),
     )
     list_display = UserAdmin.list_display + ('role',)
+    list_filter = ('role', 'is_staff')

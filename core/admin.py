@@ -1,9 +1,10 @@
 from django.contrib import admin
 from .models import TimelineEvent
 
-# Register TimelineEvent model
 @admin.register(TimelineEvent)
 class TimelineEventAdmin(admin.ModelAdmin):
-    list_display = ('user', 'event_type', 'timestamp')
-    search_fields = ('user__username', 'event_type', 'summary')
-    list_filter = ('event_type', 'timestamp')
+    list_display = ('user', 'event_type', 'title', 'timestamp', 'related_object')
+    list_filter = ('event_type',)
+    search_fields = ('title', 'summary', 'user__username')
+    ordering = ('-timestamp',)
+    date_hierarchy = 'timestamp'

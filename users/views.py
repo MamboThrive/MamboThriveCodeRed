@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView
+from django.contrib.auth.views import LogoutView, PasswordResetView, PasswordResetConfirmView
 from django.urls import reverse_lazy
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -10,19 +9,14 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from .models import CustomUser
-from .forms import UserProfileForm, UserLoginForm, UserRegisterForm, UserPasswordResetForm, UserSetPasswordForm
+from .forms import UserProfileForm, UserRegisterForm, UserPasswordResetForm, UserSetPasswordForm
 
 @login_required
 def profile_view(request):
     return render(request, 'users/profile.html', {'user': request.user})
 
-class UserLoginView(LoginView):
-    template_name = 'users/login.html'
-    authentication_form = UserLoginForm
-    redirect_authenticated_user = True
-
 class UserLogoutView(LogoutView):
-    next_page = reverse_lazy('users:login')
+    next_page = reverse_lazy('account_login')
 
 # Registration view with activation email
 def register_view(request):

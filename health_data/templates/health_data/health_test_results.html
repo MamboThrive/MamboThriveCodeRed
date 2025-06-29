@@ -1,33 +1,236 @@
 {% extends 'base.html' %}
 {% block title %}Health Test Results{% endblock %}
+
 {% block content %}
-<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
-    <h1 class="text-3xl font-extrabold mb-6 text-blue-700">Health Test Results</h1>
-    <div class="overflow-x-auto">
-    <table class="min-w-full table-auto border rounded-lg overflow-hidden">
-        <thead>
-            <tr class="bg-blue-100 text-blue-800">
-                <th class="px-4 py-2">Test Name</th>
-                <th class="px-4 py-2">Date</th>
-                <th class="px-4 py-2">Result</th>
-                <th class="px-4 py-2">Unit</th>
-                <th class="px-4 py-2">Flagged</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in results %}
-            <tr class="border-b even:bg-blue-50 hover:bg-blue-100">
-                <td class="px-4 py-2">{{ result.test_name }}</td>
-                <td class="px-4 py-2">{{ result.test_date }}</td>
-                <td class="px-4 py-2">{{ result.result_value }}</td>
-                <td class="px-4 py-2">{{ result.unit }}</td>
-                <td class="px-4 py-2">{% if result.flagged %}<span class="text-red-600 font-bold">Yes</span>{% else %}No{% endif %}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="text-center py-4 text-gray-400">No results found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg mt-10">
+    <!-- Page Title Row -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-blue-800">Health Test Results</h1>
     </div>
+    <!-- Action Buttons Row -->
+    <div class="flex flex-wrap gap-3 mb-6">
+        <form id="json-upload-form" method="post" action="{% url 'health_data:health_test_json_upload' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div id="json-upload-messages"></div>
+            {% if messages %}
+                <ul class="mb-2">
+                    {% for message in messages %}
+                        <li class="text-{{ message.tags }}-600">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <input id="json_file" type="file" name="json_file" accept="application/json" style="display:none" onchange="document.getElementById('json-filename').textContent = this.files[0]?.name || 'No file chosen'; document.getElementById('json-upload-btn').disabled = this.files.length === 0;">
+            <label for="json_file" class="cursor-pointer bg-blue-100 text-blue-900 px-4 py-2 rounded hover:bg-blue-200 font-semibold shadow border border-blue-300 focus:ring-2 focus:ring-blue-400">
+                <span>Choose JSON</span>
+            </label>
+            <span id="json-filename" class="ml-2 text-gray-700">No file chosen</span>
+            <button id="json-upload-btn" type="submit" class="ml-2 bg-blue-200 text-blue-900 px-4 py-2 rounded hover:bg-blue-300 font-semibold shadow border border-blue-400 focus:ring-2 focus:ring-blue-400" disabled>Upload</button>
+        </form>
+        <a href="{% url 'health_data:health_test_create' %}" class="bg-green-100 text-green-900 px-4 py-2 rounded hover:bg-green-200 font-semibold shadow border border-green-300 focus:ring-2 focus:ring-green-400">Add Test Result</a>
+        <a href="{% url 'health_data:bulk_rename_test_name' %}" class="bg-yellow-200 text-yellow-900 px-4 py-2 rounded hover:bg-yellow-300 font-semibold shadow border border-yellow-400 focus:ring-2 focus:ring-yellow-400">Rename Test Name</a>
+    </div>
+
+    <form method="post" action="{% url 'health_data:delete_test_results_by_date' %}" class="mb-6 flex flex-col md:flex-row gap-3 items-center">
+        {% csrf_token %}
+        <input type="date" name="test_date" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-200 text-red-900 bg-red-50" required>
+        <button type="submit" class="bg-red-100 text-red-900 px-4 py-2 rounded hover:bg-red-200 font-semibold shadow border border-red-300 focus:ring-2 focus:ring-red-400">Delete All on Date</button>
+    </form>
+
+    <!-- Filters above the table -->
+    <form method="get" id="table-filter-form" class="mb-4 flex flex-wrap gap-4 items-center">
+        <input type="text" name="test_name" value="{{ request.GET.test_name|default:'' }}" placeholder="Filter by Test Name" class="border border-gray-300 rounded px-2 py-1 w-40 bg-white shadow" oninput="debouncedSubmit(this.form)">
+        <input type="date" name="test_date" value="{{ request.GET.test_date|default:'' }}" class="border border-gray-300 rounded px-2 py-1 w-40 bg-white shadow" onchange="this.form.submit()">
+        <select name="flagged" class="border border-gray-300 rounded px-2 py-1 w-40 bg-white shadow" onchange="this.form.submit()">
+            <option value="">Flagged (All)</option>
+            <option value="true" {% if request.GET.flagged == 'true' %}selected{% endif %}>Yes</option>
+            <option value="false" {% if request.GET.flagged == 'false' %}selected{% endif %}>No</option>
+        </select>
+    </form>
+    <script>
+    // Debounce for text input filter
+    let debounceTimer;
+    function debouncedSubmit(form) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => { form.submit(); }, 400);
+    }
+    </script>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full table-auto border rounded-lg overflow-hidden shadow-sm">
+            <thead class="bg-blue-100 text-blue-800">
+                <tr>
+                    <th class="px-4 py-3 text-left">
+                        <a href="?{% for k, v in request.GET.items %}{% if k != 'sort' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}sort={% if order_by|slice:':1' == '-' and order_by|slice:'1:' == 'test_name' %}test_name{% else %}-test_name{% endif %}" class="flex items-center gap-1 hover:underline {% if order_by|slice:'-9:' == 'test_name' %}font-bold text-blue-700{% endif %}">
+                            Test Name
+                            {% if order_by == 'test_name' %} <span class="text-xs">↑</span>{% elif order_by == '-test_name' %} <span class="text-xs">↓</span>{% endif %}
+                        </a>
+                    </th>
+                    <th class="px-4 py-3 text-left">
+                        <a href="?{% for k, v in request.GET.items %}{% if k != 'sort' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}sort={% if order_by|slice:':1' == '-' and order_by|slice:'1:' == 'test_date' %}test_date{% else %}-test_date{% endif %}" class="flex items-center gap-1 hover:underline {% if order_by|slice:'-8:' == 'test_date' %}font-bold text-blue-700{% endif %}">
+                            Date
+                            {% if order_by == 'test_date' %} <span class="text-xs">↑</span>{% elif order_by == '-test_date' %} <span class="text-xs">↓</span>{% endif %}
+                        </a>
+                    </th>
+                    <th class="px-4 py-3 text-left">
+                        <a href="?{% for k, v in request.GET.items %}{% if k != 'sort' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}sort={% if order_by|slice:':1' == '-' and order_by|slice:'1:' == 'result_value' %}result_value{% else %}-result_value{% endif %}" class="flex items-center gap-1 hover:underline {% if order_by|slice:'-12:' == 'result_value' %}font-bold text-blue-700{% endif %}">
+                            Result
+                            {% if order_by == 'result_value' %} <span class="text-xs">↑</span>{% elif order_by == '-result_value' %} <span class="text-xs">↓</span>{% endif %}
+                        </a>
+                    </th>
+                    <th class="px-4 py-3 text-left">Reference Range</th>
+                    <th class="px-4 py-3 text-left">
+                        <a href="?{% for k, v in request.GET.items %}{% if k != 'sort' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}sort={% if order_by|slice:':1' == '-' and order_by|slice:'1:' == 'unit' %}unit{% else %}-unit{% endif %}" class="flex items-center gap-1 hover:underline {% if order_by|slice:'-4:' == 'unit' %}font-bold text-blue-700{% endif %}">
+                            Unit
+                            {% if order_by == 'unit' %} <span class="text-xs">↑</span>{% elif order_by == '-unit' %} <span class="text-xs">↓</span>{% endif %}
+                        </a>
+                    </th>
+                    <th class="px-4 py-3 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="results-table-body">
+                {% for result in results %}
+                <tr class="border-b even:bg-blue-50 hover:bg-blue-100 transition-colors">
+                    <td class="px-4 py-2">{{ result.test_name }}</td>
+                    <td class="px-4 py-2">{{ result.test_date }}</td>
+                    <td class="px-4 py-2">
+                        {% if result.flagged %}
+                            <span class="bg-red-100 text-red-700 font-bold px-2 py-1 rounded">{{ result.result_value }}</span>
+                        {% else %}
+                            {{ result.result_value }}
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-2">
+                        {% if result.reference_range_min and result.reference_range_max %}
+                            {{ result.reference_range_min }} - {{ result.reference_range_max }}
+                        {% elif result.reference_range_min %}
+                            ≥ {{ result.reference_range_min }}
+                        {% elif result.reference_range_max %}
+                            ≤ {{ result.reference_range_max }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-2">{{ result.unit }}</td>
+                    <td class="px-4 py-2 flex gap-3">
+                        <a href="{% url 'health_data:edit_test_result' result.pk %}" class="text-blue-600 hover:underline">Edit</a>
+                        <form method="post" action="{% url 'health_data:delete_test_result' result.pk %}" onsubmit="return confirm('Delete this test result?');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-6 text-gray-400">No results found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center mt-8">
+        <nav class="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+            {% if page_obj.has_previous %}
+                <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 rounded-l-md">Previous</a>
+            {% else %}
+                <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-l-md cursor-not-allowed">Previous</span>
+            {% endif %}
+            <span class="px-4 py-2 border-t border-b border-gray-300 bg-white text-blue-700 font-semibold">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 rounded-r-md">Next</a>
+            {% else %}
+                <span class="px-3 py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded-r-md cursor-not-allowed">Next</span>
+            {% endif %}
+        </nav>
+    </div>
+    <!-- End Pagination -->
+
+    <!-- Chart Row -->
+    <div class="mb-10">
+        <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+            <label for="metric-select" class="font-semibold text-blue-900">Select Metric:</label>
+            <select id="metric-select" class="border border-gray-300 rounded px-3 py-2 w-64 bg-white shadow">
+                {% for metric in chart_metrics %}
+                    <option value="{{ metric }}">{{ metric }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 shadow">
+            <canvas id="trendChart" height="80"></canvas>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart data from Django
+        const chartData = {{ chart_data_json|safe }};
+        const metricSelect = document.getElementById('metric-select');
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        let chartInstance = null;
+
+        function getColorArray(values, min, max) {
+            return values.map(v => {
+                if (min !== null && v < min) return 'red';
+                if (max !== null && v > max) return 'red';
+                return 'green';
+            });
+        }
+
+        function renderChart(metric) {
+            const d = chartData[metric];
+            if (!d) return;
+            const pointColors = getColorArray(d.values, d.min, d.max);
+            const data = {
+                labels: d.dates,
+                datasets: [
+                    {
+                        label: metric + ' Value',
+                        data: d.values,
+                        borderColor: '#2563eb',
+                        backgroundColor: pointColors,
+                        pointBackgroundColor: pointColors,
+                        pointRadius: 6,
+                        fill: false,
+                        tension: 0.2,
+                    },
+                    // Reference range band
+                    d.min !== null ? {
+                        label: 'Min',
+                        data: d.dates.map(() => d.min),
+                        borderColor: 'rgba(34,197,94,0.5)',
+                        borderDash: [5,5],
+                        pointRadius: 0,
+                        fill: false,
+                    } : null,
+                    d.max !== null ? {
+                        label: 'Max',
+                        data: d.dates.map(() => d.max),
+                        borderColor: 'rgba(239,68,68,0.5)',
+                        borderDash: [5,5],
+                        pointRadius: 0,
+                        fill: false,
+                    } : null,
+                ].filter(Boolean)
+            };
+            const options = {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: d.unit || 'Value' } }
+                }
+            };
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, { type: 'line', data, options });
+        }
+        metricSelect.addEventListener('change', function() {
+            renderChart(this.value);
+        });
+        // Initial render
+        renderChart(metricSelect.value);
+    </script>
 </div>
 {% endblock %}

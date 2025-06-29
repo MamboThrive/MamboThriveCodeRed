@@ -1,16 +1,35 @@
 {% extends 'base.html' %}
+{% load timeline_extras %}
 {% block title %}Timeline Events{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
     <h1 class="text-3xl font-extrabold mb-6 text-blue-700">Timeline Events</h1>
+    <!-- Filter Tabs -->
+    <div class="flex gap-2 mb-6">
+        <a href="?type=all"
+           class="px-4 py-2 rounded font-semibold border transition {% if active_type == 'all' %}bg-blue-600 text-white{% else %}bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200{% endif %}">
+            All
+        </a>
+        {% for type, label in event_types %}
+            <a href="?type={{ type }}"
+               class="px-4 py-2 rounded font-semibold border transition {% if active_type == type %}bg-blue-600 text-white{% else %}bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200{% endif %}">
+                {{ icon_map|icon_lookup:type }} {{ label }}
+                {% with count=type_count_map|dict_lookup:type %}{% if count %}<span class="ml-1 text-xs bg-blue-200 text-blue-800 rounded px-2">{{ count }}</span>{% endif %}{% endwith %}
+            </a>
+        {% endfor %}
+    </div>
+    <!-- Timeline List -->
     <ul class="space-y-4">
         {% for event in events %}
-        <li class="bg-blue-50 rounded p-4 shadow-sm border-l-4 border-blue-400">
-            <span class="font-semibold text-blue-700">{{ event.timestamp }}</span> - <span class="text-gray-600">{{ event.event_type }}</span><br>
-            <span class="text-gray-800">{{ event.summary }}</span>
+        <li class="flex items-center gap-4 bg-blue-50 rounded p-4 shadow-sm border-l-4 border-blue-400">
+            <span class="text-2xl">{{ icon_map|icon_lookup:event.event_type }}</span>
+            <div>
+                <div class="font-semibold text-blue-800">{{ event.summary|default:event.title }}</div>
+                <div class="text-gray-500 text-sm">{{ event.timestamp|date:'M d, Y H:i' }}</div>
+            </div>
         </li>
         {% empty %}
-        <li class="text-gray-400">No events found.</li>
+        <li class="text-gray-400">No events found for this type.</li>
         {% endfor %}
     </ul>
 </div>

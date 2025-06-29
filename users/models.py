@@ -10,6 +10,7 @@ class CustomUser(AbstractUser):
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='patient')
+    email = models.EmailField(unique=True)
 
     # Explicitly set related_name to avoid clashes with auth.User
     groups = models.ManyToManyField(

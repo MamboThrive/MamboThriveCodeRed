@@ -1,0 +1,1 @@
+Delete this file and any duplicate login.html in this folder. Use only the main login.html in mambothrive/templates/account/.

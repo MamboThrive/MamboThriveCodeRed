@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Health Dashboard{% endblock %}
+
+{% block content %}
+<div class="px-2 sm:px-4 md:px-8">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">Welcome back, {{ user.first_name }}</h2>
+
+  <!-- Alert Box -->
+  {% if show_alert %}
+  <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-800 rounded flex items-center gap-3">
+    <span class="text-2xl">🚨</span>
+    <span><strong>{{ out_of_range_count }}</strong> test result{{ out_of_range_count|pluralize }} {{ out_of_range_count|pluralize:'is,are' }} out of the healthy range. <a href="{% url 'health_data:health_test_results' %}?flagged=true" class="underline font-semibold">Click to view details.</a></span>
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8 min-w-0">
+    {% include "components/metric_box.html" with label="LDL" value=ldl.result_value|default:'—'|add:' '|add:ldl.unit|default:'' note=ldl.test_date|date:'M d, Y' %}
+    {% include "components/metric_box.html" with label="HDL" value=hdl.result_value|default:'—'|add:' '|add:hdl.unit|default:'' note=hdl.test_date|date:'M d, Y' %}
+    {% include "components/metric_box.html" with label="Glucose" value=glucose.result_value|default:'—'|add:' '|add:glucose.unit|default:'' note=glucose.test_date|date:'M d, Y' %}
+    {% include "components/metric_box.html" with label="Today's Calories" value=calories_today|floatformat:0|add:' kcal' note="" %}
+  </div>
+
+  <!-- Summary Charts -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 overflow-x-auto">
+    <div class="bg-white rounded-lg shadow p-4 min-w-0">
+      <div class="font-semibold text-indigo-700 mb-2">LDL Trend</div>
+      <canvas id="ldlChart" height="60" class="w-full"></canvas>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 min-w-0">
+      <div class="font-semibold text-indigo-700 mb-2">HDL Trend</div>
+      <canvas id="hdlChart" height="60" class="w-full"></canvas>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 min-w-0">
+      <div class="font-semibold text-indigo-700 mb-2">Glucose Trend</div>
+      <canvas id="glucoseChart" height="60" class="w-full"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  const ldlTrend = JSON.parse('{{ ldl_trend_json|default:"[]"|escapejs }}');
+  const hdlTrend = JSON.parse('{{ hdl_trend_json|default:"[]"|escapejs }}');
+  const glucoseTrend = JSON.parse('{{ glucose_trend_json|default:"[]"|escapejs }}');
+  function renderTrendChart(canvasId, trend, label, color) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const dates = trend.map(function(pair) { return pair[0]; });
+    const values = trend.map(function(pair) { return pair[1]; });
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: label,
+          data: values,
+          borderColor: color,
+          backgroundColor: color,
+          fill: false,
+          tension: 0.2,
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        elements: { line: { borderWidth: 3 } }
+      }
+    });
+  }
+  renderTrendChart('ldlChart', ldlTrend, 'LDL', '#6366f1');
+  renderTrendChart('hdlChart', hdlTrend, 'HDL', '#10b981');
+  renderTrendChart('glucoseChart', glucoseTrend, 'Glucose', '#f59e42');
+  </script>
+</div>
+{% endblock %}

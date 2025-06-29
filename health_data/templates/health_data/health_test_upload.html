@@ -1,0 +1,13 @@
+<!-- health_data/templates/health_data/health_test_upload.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Upload Health Test Results (JSON)</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+{% endblock %}

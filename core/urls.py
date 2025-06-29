@@ -9,4 +9,5 @@ app_name = 'core'  # Namespacing for the core app
 
 urlpatterns = [
     path('timeline/', views.timeline_view, name='timeline'),
+    path('timeline/events/', views.timeline_event_list, name='timeline_events'),
 ]

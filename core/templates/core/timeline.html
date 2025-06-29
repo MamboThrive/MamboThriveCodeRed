@@ -1,0 +1,16 @@
+<!-- core/templates/core/timeline.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Health Timeline</h2>
+<ul>
+  {% for event in events %}
+    <li>
+      <strong>{{ event.timestamp|date:"Y-m-d H:i" }}</strong> - {{ event.summary }}
+    </li>
+  {% empty %}
+    <li>No events yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

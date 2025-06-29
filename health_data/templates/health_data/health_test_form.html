@@ -1,0 +1,39 @@
+<!-- health_data/templates/health_data/health_test_form.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-8 rounded shadow mt-12">
+    <h2 class="text-2xl font-bold mb-6 text-blue-700">{% if edit %}Edit Health Test Result{% else %}Add Health Test Result{% endif %}</h2>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{ form.test_date.label_tag }}
+            {{ form.test_date }}
+            {{ form.test_name.label_tag }}
+            {{ form.test_name }}
+            {{ form.result_value.label_tag }}
+            {{ form.result_value }}
+            {{ form.unit.label_tag }}
+            {{ form.unit }}
+            {{ form.reference_range_min.label_tag }}
+            {{ form.reference_range_min }}
+            {{ form.reference_range_max.label_tag }}
+            {{ form.reference_range_max }}
+            {{ form.flagged.label_tag }}
+            {{ form.flagged }}
+            {{ form.tags.label_tag }}
+            {{ form.tags }}
+        </div>
+        <div>
+            {{ form.note.label_tag }}
+            {{ form.note }}
+        </div>
+        <div class="flex gap-4 mt-6">
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-semibold shadow transition-colors">Save</button>
+            <a href="{% url 'health_data:health_test_results' %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold shadow transition-colors">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

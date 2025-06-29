@@ -1,21 +1,46 @@
 {% extends "base.html" %}
-{% load static %}
+{% load wagtailcore_tags %}
 
-{% block body_class %}template-homepage{% endblock %}
-
-{% block extra_css %}
-
-{% comment %}
-Delete the line below if you're just getting started and want to remove the welcome screen!
-{% endcomment %}
-<link rel="stylesheet" href="{% static 'css/welcome_page.css' %}">
-{% endblock extra_css %}
+{% block title %}{{ page.title }}{% endblock %}
 
 {% block content %}
+<!-- Hero Section -->
+<section class="bg-white py-20 text-center">
+  <h1 class="text-4xl font-bold text-indigo-600 mb-4">{{ page.hero_title }}</h1>
+  <p class="text-lg text-gray-700 mb-6 max-w-xl mx-auto">{{ page.hero_subtitle }}</p>
+  <div class="space-x-4">
+    {% if not user.is_authenticated %}
+      <a href="{% url 'account_login' %}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700">Log In</a>
+      <a href="{% url 'account_signup' %}" class="bg-white border border-indigo-600 text-indigo-600 px-6 py-3 rounded-lg hover:bg-indigo-50">Get Started</a>
+    {% else %}
+      <span class="text-lg text-gray-700 mr-4">Welcome, {{ user.get_full_name|default:user.username }}!</span>
+      <a href="{% url 'dashboard:dashboard' %}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700">Go to Dashboard</a>
+    {% endif %}
+  </div>
+</section>
 
-{% comment %}
-Delete the line below if you're just getting started and want to remove the welcome screen!
-{% endcomment %}
-{% include 'home/welcome_page.html' %}
+<!-- Features Section -->
+{% if page.features %}
+<section class="py-16 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+    {% for block in page.features %}
+      {% with block.value as f %}
+      <div>
+        <div class="text-4xl mb-2">{{ f.icon }}</div>
+        <h3 class="text-xl font-semibold">{{ f.title }}</h3>
+        <p class="text-sm text-gray-600 mt-2">{{ f.description }}</p>
+      </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
-{% endblock content %}
+<!-- CTA -->
+{% if not user.is_authenticated %}
+<section class="py-12 bg-indigo-600 text-white text-center">
+  <h2 class="text-2xl font-semibold mb-4">Ready to take control of your health?</h2>
+  <a href="{% url 'account_signup' %}" class="bg-white text-indigo-600 px-6 py-3 rounded-lg hover:bg-indigo-50 font-semibold">Create Your Free Account</a>
+</section>
+{% endif %}
+{% endblock %}

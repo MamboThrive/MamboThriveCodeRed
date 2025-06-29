@@ -1,0 +1,10 @@
+Delete these unused or duplicate templates for a clean allauth setup:
+
+- activation_sent.html
+- activation_invalid.html
+- register.html
+- password_reset_email.html
+- password_reset_confirm.html
+- users/templates/account/login.html
+
+Keep only the main allauth templates as listed in README-templates.txt.

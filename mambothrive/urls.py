@@ -17,6 +17,7 @@ urlpatterns = [
     path("coaching/", include("coaching.urls")),  # Coaching app URLs
     path("core/", include("core.urls")),          # Core app URLs
     path("dashboard/", include("dashboard.urls")),# Dashboard app URLs
+    path("health_data/", include("health_data.urls")),  # Coaching app URLs
     path("nutrition/", include("nutrition.urls")),# Nutrition app URLs
     path("users/", include("users.urls")),        # Users app URLs
     path("accounts/", include("allauth.urls")),   # Allauth URLs at root

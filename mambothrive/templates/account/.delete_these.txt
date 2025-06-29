@@ -1,0 +1,6 @@
+register.html
+password_reset_email.html
+password_reset_confirm.html
+activation_sent.html
+activation_invalid.html
+users/templates/account/login.html
