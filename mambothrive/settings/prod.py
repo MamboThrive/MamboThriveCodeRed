@@ -31,6 +31,8 @@ EMAIL_HOST_USER = 'MamboThrive@gmail.com'
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']  # Set this env var securely
 DEFAULT_FROM_EMAIL = 'MamboThrive <MamboThrive@gmail.com>'
 
+OPENROUTER_KEY = os.environ['OPENROUTER_KEY']
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

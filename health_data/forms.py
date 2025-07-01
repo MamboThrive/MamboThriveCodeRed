@@ -24,3 +24,7 @@ class LabReportUploadForm(forms.ModelForm):
 class HealthTestResultUploadForm(forms.Form):
     json_file = forms.FileField()
 
+class PDFExtractForm(forms.Form):
+    pdf_file = forms.FileField(label="Upload Health Exam PDF")
+    source = forms.CharField(label="Source (Hospital/Clinic)", max_length=100, required=False)
+

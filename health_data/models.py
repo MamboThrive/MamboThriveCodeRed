@@ -7,11 +7,11 @@ class HealthTestResult(models.Model):
     test_date = models.DateField()
     test_name = models.CharField(max_length=255)
     result_value = models.FloatField()
-    unit = models.CharField(max_length=50)
+    unit = models.CharField(max_length=50, null=True, blank=True)
     reference_range_min = models.FloatField(null=True, blank=True)
     reference_range_max = models.FloatField(null=True, blank=True)
     flagged = models.BooleanField(default=False)
-    note = models.TextField(blank=True)
+    note = models.TextField(blank=True, null=True)
 
     tags = ParentalManyToManyField("core.ConditionTag", blank=True)
 

@@ -16,4 +16,5 @@ urlpatterns = [
     path('results/bulk_rename/', views.bulk_rename_test_name, name='bulk_rename_test_name'),
     path('uploads/', views.lab_upload_view, name='lab_report_uploads'),
     path("upload/json/", views.health_test_json_upload, name="health_test_json_upload"),
+    path('extract-pdf/', views.extract_pdf_view, name='extract_pdf'),
 ]

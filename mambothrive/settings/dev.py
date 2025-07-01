@@ -13,6 +13,8 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 NPM_BIN_PATH = "C:\\Program Files\\nodejs\\npm.cmd"
 
+OPENROUTER_KEY = os.getenv('OPENROUTER_KEY', None)
+
 
 try:
     from .local import *

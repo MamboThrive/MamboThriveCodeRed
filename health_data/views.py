@@ -4,7 +4,7 @@ import json as pyjson
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import HealthTestResult, LabReportUpload
-from .forms import HealthTestResultForm, LabReportUploadForm, HealthTestResultUploadForm
+from .forms import HealthTestResultForm, LabReportUploadForm, HealthTestResultUploadForm, PDFExtractForm
 from core.models import TimelineEvent
 from django.contrib import messages
 import json
@@ -13,6 +13,8 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.db.models import Q
+from .openrouter_pdf import extract_health_data_from_pdf, extract_text_from_pdf, extract_health_data_from_text
+import io
 
 @login_required
 def test_result_view(request):
@@ -261,3 +263,141 @@ def health_test_json_upload(request):
         return redirect('health_data:health_test_results')
     messages.error(request, "Invalid request method.")
     return redirect('health_data:health_test_results')
+
+@login_required
+def health_test_pdf_upload(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('pdf_file')
+        if uploaded_file:
+            # Extract health data from the uploaded PDF file
+            extraction_results = extract_health_data_from_pdf(uploaded_file, request.user)
+            
+            # Process the extraction results (this will depend on your extraction logic)
+            for result in extraction_results:
+                # For example, create HealthTestResult objects from the extracted data
+                HealthTestResult.objects.create(
+                    user=request.user,
+                    test_date=result['test_date'],
+                    test_name=result['test_name'],
+                    result_value=result['result_value'],
+                    unit=result['unit'],
+                    reference_range_min=result.get('reference_range_min'),
+                    reference_range_max=result.get('reference_range_max'),
+                    flagged=result.get('flagged', False),
+                    note=result.get('note', '')
+                )
+            
+            messages.success(request, "Health data extracted and test results created from PDF.")
+            return redirect('health_data:health_test_results')
+        else:
+            messages.error(request, "No file was uploaded. Please select a PDF file to upload.")
+    return render(request, 'health_data/health_test_pdf_upload.html', {})
+
+@login_required
+def extract_pdf_view(request):
+    from .models import LabReportUpload
+    extracted_results = None
+    extraction_error = None
+    truncation_warning = None
+    created = 0
+    extracted_text = None
+    char_count = 0
+    max_chars = 8000
+    lab_upload_id = request.POST.get('lab_upload_id')
+    lab_upload = None
+    if lab_upload_id:
+        try:
+            lab_upload = LabReportUpload.objects.get(id=lab_upload_id, user=request.user)
+        except LabReportUpload.DoesNotExist:
+            extraction_error = 'Could not find uploaded file. Please re-upload.'
+    # Always load extracted_results from session if present
+    extracted_results = request.session.get('extracted_results')
+    if request.method == 'POST':
+        form = PDFExtractForm(request.POST, request.FILES)
+        extracted_text = request.POST.get('extracted_text')
+        char_count = len(extracted_text) if extracted_text else 0
+        # If this is the first upload step
+        if not lab_upload and form.is_valid():
+            pdf_file = form.cleaned_data['pdf_file']
+            source = form.cleaned_data['source']
+            lab_upload = LabReportUpload.objects.create(
+                user=request.user,
+                file=pdf_file,
+                source=source or '',
+                parsed=False
+            )
+            pdf_file.seek(0)
+            pdf_bytes = pdf_file.read()
+            pdf_io = io.BytesIO(pdf_bytes)
+            extracted_text = extract_text_from_pdf(pdf_io)
+            if not extracted_text or not extracted_text.strip():
+                # Try OCR if no extractable text
+                from .openrouter_pdf import extract_text_from_pdf_with_easyocr
+                extracted_text = extract_text_from_pdf_with_easyocr(pdf_io)
+                char_count = len(extracted_text)
+                if not extracted_text or not extracted_text.strip():
+                    extraction_error = 'No extractable text found in the uploaded PDF, even with OCR.'
+            else:
+                char_count = len(extracted_text)
+            if char_count > max_chars:
+                extraction_error = f'Extracted text exceeds maximum length of {max_chars} characters. Please truncate or edit the text.'
+        elif lab_upload:
+            pdf_file = lab_upload.file
+            pdf_file.open('rb')
+            pdf_bytes = pdf_file.read()
+            pdf_io = io.BytesIO(pdf_bytes)
+            pdf_file.close()
+            if extracted_text is not None and 'edit_text' in request.POST:
+                char_count = len(extracted_text)
+                if char_count > max_chars and 'truncate_text' in request.POST:
+                    extracted_text = extracted_text[:max_chars]
+                    char_count = max_chars
+                if 'send_to_llm' in request.POST or 'truncate_text' in request.POST:
+                    try:
+                        results, truncation_warning = extract_health_data_from_text(extracted_text)
+                        extracted_results = results
+                        request.session['extracted_results'] = extracted_results
+                    except Exception as e:
+                        extraction_error = str(e)
+            elif 'confirm_save' in request.POST:
+                # Save results to DB
+                if not extracted_results:
+                    extraction_error = 'No extracted results found. Please extract again.'
+                else:
+                    created = 0
+                    for r in extracted_results:
+                        try:
+                            HealthTestResult.objects.create(
+                                user=request.user,
+                                test_date=r.get('test_date'),
+                                test_name=r.get('test_name'),
+                                result_value=r.get('result_value'),
+                                unit=r.get('unit'),
+                                reference_range_min=r.get('reference_range_min'),
+                                reference_range_max=r.get('reference_range_max'),
+                                flagged=r.get('flagged', False),
+                                note=r.get('note', '')
+                            )
+                            created += 1
+                        except Exception as e:
+                            print('Failed to save result:', r, e)
+                    messages.success(request, f"Saved {created} test result(s) to your records.")
+                    if 'extracted_results' in request.session:
+                        del request.session['extracted_results']
+                    return redirect('health_data:health_test_results')
+            else:
+                extracted_text = extract_text_from_pdf(pdf_io)
+                char_count = len(extracted_text)
+    else:
+        form = PDFExtractForm()
+    return render(request, 'health_data/extract_pdf.html', {
+        'form': form,
+        'extracted_results': extracted_results,
+        'extraction_error': extraction_error,
+        'truncation_warning': truncation_warning,
+        'created': created,
+        'extracted_text': extracted_text,
+        'char_count': char_count,
+        'max_chars': max_chars,
+        'lab_upload_id': lab_upload.id if lab_upload else '',
+    })
