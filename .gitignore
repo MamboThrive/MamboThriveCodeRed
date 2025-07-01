@@ -10,3 +10,5 @@ htmlcov/
 .env
 *.log
 *.bat
+health_data/json_data/
+health_data/pdf_data/
