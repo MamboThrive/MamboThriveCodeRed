@@ -9,26 +9,10 @@
     </div>
     <!-- Action Buttons Row -->
     <div class="flex flex-wrap gap-3 mb-6">
-        <form id="json-upload-form" method="post" action="{% url 'health_data:health_test_json_upload' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div id="json-upload-messages"></div>
-            {% if messages %}
-                <ul class="mb-2">
-                    {% for message in messages %}
-                        <li class="text-{{ message.tags }}-600">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <input id="json_file" type="file" name="json_file" accept="application/json" style="display:none" onchange="document.getElementById('json-filename').textContent = this.files[0]?.name || 'No file chosen'; document.getElementById('json-upload-btn').disabled = this.files.length === 0;">
-            <label for="json_file" class="cursor-pointer bg-blue-100 text-blue-900 px-4 py-2 rounded hover:bg-blue-200 font-semibold shadow border border-blue-300 focus:ring-2 focus:ring-blue-400">
-                <span>Choose JSON</span>
-            </label>
-            <span id="json-filename" class="ml-2 text-gray-700">No file chosen</span>
-            <button id="json-upload-btn" type="submit" class="ml-2 bg-blue-200 text-blue-900 px-4 py-2 rounded hover:bg-blue-300 font-semibold shadow border border-blue-400 focus:ring-2 focus:ring-blue-400" disabled>Upload</button>
-        </form>
+        <!-- JSON upload removed -->
         <a href="{% url 'health_data:health_test_create' %}" class="bg-green-100 text-green-900 px-4 py-2 rounded hover:bg-green-200 font-semibold shadow border border-green-300 focus:ring-2 focus:ring-green-400">Add Test Result</a>
         <a href="{% url 'health_data:bulk_rename_test_name' %}" class="bg-yellow-200 text-yellow-900 px-4 py-2 rounded hover:bg-yellow-300 font-semibold shadow border border-yellow-400 focus:ring-2 focus:ring-yellow-400">Rename Test Name</a>
-        <a href="{% url 'health_data:extract_pdf' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold shadow border border-blue-800 focus:ring-2 focus:ring-blue-400">Extract PDF Results</a>
+        <!-- Extract PDF Results removed -->
     </div>
 
     <form method="post" action="{% url 'health_data:delete_test_results_by_date' %}" class="mb-6 flex flex-col md:flex-row gap-3 items-center">
@@ -233,5 +217,16 @@
         // Initial render
         renderChart(metricSelect.value);
     </script>
+
+    <!-- JSON Upload Form -->
+    <form id="json-upload-form" method="post" action="{% url 'health_data:health_test_json_upload' %}" enctype="multipart/form-data" class="mb-4 flex flex-wrap gap-2 items-center">
+        {% csrf_token %}
+        <input id="json_file" type="file" name="json_file" accept="application/json" style="display:none" onchange="document.getElementById('json-filename').textContent = this.files[0]?.name || 'No file chosen'; document.getElementById('json-upload-btn').disabled = this.files.length === 0;">
+        <label for="json_file" class="cursor-pointer bg-blue-100 text-blue-900 px-4 py-2 rounded hover:bg-blue-200 font-semibold shadow border border-blue-300 focus:ring-2 focus:ring-blue-400">
+            <span>Choose JSON</span>
+        </label>
+        <span id="json-filename" class="ml-2 text-gray-700">No file chosen</span>
+        <button id="json-upload-btn" type="submit" class="ml-2 bg-blue-200 text-blue-900 px-4 py-2 rounded hover:bg-blue-300 font-semibold shadow border border-blue-400 focus:ring-2 focus:ring-blue-400" disabled>Upload</button>
+    </form>
 </div>
 {% endblock %}
